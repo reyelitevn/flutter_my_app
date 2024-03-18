@@ -1,0 +1,30 @@
+name: Bump app version based on PR labels
+# Workflow for every new feature/enhance/fix
+on:
+  pull_request:
+    branches:
+    - develop
+    types:
+    - labeled
+
+jobs:
+  bump_version_based_on_labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Dart Language
+        uses: dart-lang/setup-dart@v1.3
+      - name: Convert labels to version parts
+        run: "dart build-system/git_labels_version.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"      
+      # Setup Ruby, Bundler, Gemfile
+      - name: Setup Fastlane
+        if: env.parts != ''
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.6"
+          bundler-cache: true
+          working-directory: android
+      - run: bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false
+        if: env.parts != ''
+        working-directory: android

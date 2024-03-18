@@ -1,0 +1,31 @@
+name: CI Develop
+
+on:
+  pull_request:
+    branches:
+      - develop
+    paths: 
+      - 'lib/**'
+      - 'test/**'
+
+jobs:
+  analyze_code_and_test:
+    # This job will run on ubuntu virtual machine
+    runs-on: ubuntu-latest
+    steps:
+    # Checkout Repo code
+    - name: Checkout Repo
+      uses: actions/checkout@v3
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v2
+    - name: Get flutter dependencies.
+      run: flutter pub get
+
+    - name: Check for any formatting issues in the code.
+      run: dart format --set-exit-if-changed .
+
+    - name: Statically analyze the Dart code for any errors.
+      run: dart analyze
+
+    - name: Run Tests
+      run: flutter test

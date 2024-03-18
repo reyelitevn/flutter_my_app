@@ -1,0 +1,63 @@
+name: Deploy iOS & Android to production
+on:
+  pull_request:
+    branches:
+    - main
+    types:
+    - closed
+jobs:
+
+  promote-android:
+    if: ${{ (github.event.pull_request.merged == true) }}
+    name: Promote Android Release from selected track to production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter doctor -v
+      # Checkout Repo code
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Setup Dart Language
+        uses: dart-lang/setup-dart@v1.3
+      - name: Convert labels to track
+        run: "dart workflows_utils/labels_to_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
+      - name: Get Project Version
+        run: "dart workflows_utils/get_project_version.dart"
+      # Setup Ruby, Bundler, Gemfile
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.6"
+          bundler-cache: true
+          working-directory: android
+
+      - name: Configure Keystore
+        run: |
+          echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+          echo "storeFile=upload-keystore.jks" >> key.properties
+          echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
+          echo "storePassword=$KEYSTORE_STORE_PASSWORD" >> key.properties
+          echo "keyPassword=$KEYSTORE_KEY_PASSWORD" >> key.properties
+        env:
+          PLAY_STORE_UPLOAD_KEY: ${{ secrets.PLAY_STORE_UPLOAD_KEY }}
+          KEYSTORE_KEY_ALIAS: ${{ secrets.KEYSTORE_KEY_ALIAS }}
+          KEYSTORE_KEY_PASSWORD: ${{ secrets.KEYSTORE_KEY_PASSWORD }}
+          KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
+        working-directory: android
+
+      - run: bundle exec fastlane android promote from:${{ env.track }} to:production
+        working-directory: android
+        env:
+            PLAY_STORE_CONFIG_JSON: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: "${{ env.version_name }} + ${{ env.version_version_code }}",
+                generate_release_notes: true
+              });

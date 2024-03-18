@@ -1,0 +1,45 @@
+default_platform(:android)
+
+platform :android do
+
+  desc "Submit a new build to Google Play"
+  lane :deploy do |options|
+    sh "flutter pub get"
+    sh "flutter build appbundle -v"
+    upload_to_play_store(
+      track: options[:track] || "staging",
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      json_key_data: ENV['PLAY_STORE_CONFIG_JSON'],
+      )
+  end
+
+  desc "Promote from track to another track"
+  lane :promote do |options|
+    upload_to_play_store(
+      track: options[:from] || "staging",
+      track_promote_to: options[:to] || "staging",
+      skip_upload_changelogs: true,
+      json_key_data: ENV['PLAY_STORE_CONFIG_JSON'],
+      version_name: options[:version_name],
+      version_code: options[:version_code].to_i,
+      )
+  end
+end
+
+lane :bump_version do |options|
+  result = flutter_bump_version(
+    bump_build:options[:bump_build],
+    parts: options[:bump],
+    pubspec: "../pubspec.yaml"
+  )
+  if(options[:push] || options[:bump])
+    sh "git config --global user.email kiyochinh@gmail.com"
+    sh "git config --global user.name Kiyo Chinh"
+    sh "git config --global push.followTags true"
+    sh "git add ../../pubspec.yaml"
+    sh 'git commit -m "[Chore] Bump version from '+result[:previous]+ ' to ' + result[:new] + '"'
+    sh 'git tag -a v'+result[:new]+' -m "Version '+result[:new]+'"'
+    sh 'git pull --rebase origin '+options[:branch]
+    sh "git push origin HEAD:"+options[:branch]
+  end
+end
