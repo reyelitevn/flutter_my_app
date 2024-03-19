@@ -2,16 +2,31 @@ lane :bump_version do |options|
   result = flutter_bump_version(
     bump_build:options[:bump_build],
     parts: options[:bump],
-    pubspec: "pubspec.yaml"
+    pubspec: "../pubspec.yaml"
   )
-  if(options[:push] || options[:bump])
+  if options[:push] || options[:bump]
+    # Configure Git
     sh "git config --global user.email kiyochinh@gmail.com"
     sh "git config --global user.name Kiyo Chinh"
     sh "git config --global push.followTags true"
     sh "git add ../pubspec.yaml"
+
+    # Commit changes
     sh 'git commit -m "[Chore] Bump version from '+result[:previous]+ ' to ' + result[:new] + '"'
-    sh 'git tag -a v'+result[:new]+' -m "Version '+result[:new]+'"'
-    sh 'git pull --rebase origin '+options[:branch]
-    sh "git push origin HEAD:"+options[:branch]
+
+    # Format the tag name to replace '+' with '.' and prepend 'Release '
+    formatted_tag_name = "Release v" + result[:new].gsub('+', '.')
+
+    # Define your release log message here
+    release_log = "Your detailed release log here."
+
+    # Create an annotated tag with the formatted name and release log as the message
+    sh "git tag -a '#{formatted_tag_name}' -m '#{release_log}'"
+
+    # Pull & rebase
+    sh 'git pull --rebase origin ' + options[:branch]
+
+    # Push changes along with the new tag
+    sh "git push origin HEAD:" + options[:branch] + " --tags"
   end
 end
