@@ -2,7 +2,7 @@ lane :bump_version do |options|
   result = flutter_bump_version(
     bump_build:options[:bump_build],
     parts: options[:bump],
-    pubspec: "../pubspec.yaml"
+    pubspec: "./pubspec.yaml"
   )
   if options[:push] || options[:bump]
     # Configure Git
