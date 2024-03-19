@@ -22,6 +22,14 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+// Keystore configs
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('fastlane/key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace "com.example.my_app"
     compileSdk flutter.compileSdkVersion
