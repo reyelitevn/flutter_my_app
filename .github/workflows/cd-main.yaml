@@ -23,9 +23,9 @@ jobs:
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
       - name: Convert labels to track
-        run: "dart workflows_utils/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
+        run: "dart build-system/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
       - name: Get Project Version
-        run: "dart workflows_utils/project_version.dart"
+        run: "dart build-system/project_version.dart"
       # Setup Ruby, Bundler, Gemfile
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
