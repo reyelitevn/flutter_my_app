@@ -1,6 +1,20 @@
 lane :bump_version do |options|
+  # Pseudo-code to extract the current version and build number
+  # You'll need to implement this based on your project's specifics
+  current_version, current_build = get_current_version_and_build_from_pubspec()
+
+  # Reset build number to 0 if bumping major, minor, or patch
+  if ['major', 'minor', 'patch'].include?(options[:bump])
+    new_build = 0
+    # Modify the bump option to include resetting build number to 0
+    # This assumes your flutter_bump_version action can handle such an input
+    options[:bump] += ",build:0"
+  else
+    new_build = current_build # Or however you handle bumping the build number
+  end
+
   result = flutter_bump_version(
-    bump_build:options[:bump_build],
+    bump_build: options[:bump_build],
     parts: options[:bump],
     pubspec: "./pubspec.yaml"
   )
