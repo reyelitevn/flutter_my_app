@@ -132,7 +132,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: android-app
-          path: ${{ runner.temp }}/build/app/outputs/bundle/release/app-release.aab
+          path: ${{ runner.temp }}/build/app/outputs/flutter-apk/app-release.apk
           # you can also archive the entire directory
           # path: ${{ runner.temp }}/build
           retention-days: 3
