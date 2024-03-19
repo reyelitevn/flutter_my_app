@@ -120,7 +120,7 @@ jobs:
         uses: dart-lang/setup-dart@v1.3
       - name: Convert labels to track
         id: git_labels_track
-        run: "dart workflows_utils/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
+        run: "dart build-system/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
       # Setup Ruby, Bundler, Gemfile & flutter dependencies & Build Android
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
