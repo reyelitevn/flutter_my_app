@@ -132,22 +132,22 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: android-app
-          path: ${{ runner.temp }}/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           # you can also archive the entire directory
           # path: ${{ runner.temp }}/build
           retention-days: 3
 
-  commit_version_bump:
-    name: Commit Version Bump
-    needs: [build_android]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "2.6"
-          bundler-cache: true
-      - name: Bump version via fastlane
-        run: bundle exec fastlane bump_version push:true branch:${{ github.ref_name }}
+  # commit_version_bump:
+  #   name: Commit Version Bump
+  #   needs: [build_android]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Repo
+  #       uses: actions/checkout@v3
+  #     - name: Setup Fastlane
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: "2.6"
+  #         bundler-cache: true
+  #     - name: Bump version via fastlane
+  #       run: bundle exec fastlane bump_version push:true branch:${{ github.ref_name }}
