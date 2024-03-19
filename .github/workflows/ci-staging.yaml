@@ -6,25 +6,6 @@ on:
     types:
       - closed
 jobs:
-  bump_version:
-    name: Bump version
-    runs-on: ubuntu-latest
-    outputs:
-      new_version: ${{ steps.bump.outputs.new_version }}
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-      - name: Setup Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "2.6"
-          bundler-cache: true
-      - name: Bump version via fastlane
-        id: bump
-        run: |
-          bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
-          echo "::set-output name=new_version::$(version.txt)"
-
   build_ios:
     name: Build Flutter (iOS)
     runs-on: macos-latest
@@ -78,6 +59,7 @@ jobs:
           cd ios
 
           # Build the app for iOS
+          bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
           flutter build ios --release --no-codesign
 
           xcodebuild -scheme "Runner" \
@@ -136,14 +118,10 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
-      - name: Setup Git
-        run: |
-          git config --global user.email "kiyochinh@gmail.com"
-          git config --global user.name "Kiyo Chinh"
-      - name: Commit and Tag New Version
-        run: |
-          new_version="${{ needs.bump_version.outputs.new_version }}"
-          git add .
-          git commit -m "[Chore] Bump version to $new_version"
-          git tag -a "v$new_version" -m "Version $new_version"
-          git push origin HEAD:${{ github.ref_name }} --tags
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.6"
+          bundler-cache: true
+      - name: Bump version via fastlane
+        run: bundle exec fastlane bump_version push:true branch:${{ github.ref_name }}
