@@ -17,7 +17,7 @@ jobs:
         uses: dart-lang/setup-dart@v1.3
       - name: Convert labels to version parts
         id: version_parts
-        run: echo "parts=$(dart build-system/git_labels_version.dart ${{ join(github.event.pull_request.labels.*.name,' ') }})" >> $GITHUB_ENV
+        run: dart build-system/git_labels_version.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}
       # Setup Ruby, Bundler, Gemfile for Fastlane
       - name: Setup Fastlane
         if: env.parts != ''
@@ -29,5 +29,5 @@ jobs:
       - name: Bump version via fastlane for Flutter
         if: env.parts != ''
         run: |
-          bundle exec fastlane bump_version branch:${{ github.head_ref }} parts:${{ env.parts }} bump_build:false
+          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false
         working-directory: .
