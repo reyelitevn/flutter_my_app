@@ -1,6 +1,6 @@
 lane :bump_version do |options|
   # Read the current version from pubspec.yaml
-  pubspec_path = "./pubspec.yaml"
+  pubspec_path = "../pubspec.yaml"
   pubspec_content = File.read(pubspec_path)
   version_match = pubspec_content.match(/version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)/)
   unless version_match

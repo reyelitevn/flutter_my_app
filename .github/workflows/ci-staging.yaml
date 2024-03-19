@@ -85,10 +85,8 @@ jobs:
       - name: Upload application
         uses: actions/upload-artifact@v3
         with:
-          name: app
+          name: iOS-Artifact
           path: ${{ runner.temp }}/build/my_app.ipa
-          # you can also archive the entire directory 
-          # path: ${{ runner.temp }}/build
           retention-days: 3    
      
   build_android:
@@ -100,7 +98,6 @@ jobs:
         with:
           channel: stable
       - run: flutter doctor -v
-      # Checkout Repo code
       - name: Checkout Repo
         uses: actions/checkout@v3
       - name: Setup Dart Language
@@ -108,7 +105,6 @@ jobs:
       - name: Convert labels to track
         id: git_labels_track
         run: "dart build-system/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}"
-      # Setup Ruby, Bundler, Gemfile & flutter dependencies & Build Android
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -130,3 +126,41 @@ jobs:
           bundler-cache: true
       - name: Bump version via fastlane
         run: bundle exec fastlane bump_version push:true branch:${{ github.ref_name }}
+
+  distribute_to_firebase:
+    needs: [build_ios, build_android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download iOS Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: iOS-Artifact
+          path: downloaded-artifacts/ios
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: Android-Artifact
+          path: downloaded-artifacts/android
+
+      - name: Install Firebase CLI
+        run: curl -sL firebase.tools | bash
+
+      - name: Upload iOS IPA to Firebase App Distribution
+        run: firebase appdistribution:distribute downloaded-artifacts/ios/your-app.ipa --app ${{ secrets.FIREBASE_APP_ID_IOS }} --token ${{ secrets.FIREBASE_TOKEN }} --groups "test-group" 
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Upload Android APK to Firebase App Distribution
+        run: firebase appdistribution:distribute downloaded-artifacts/android/your-app.apk --app ${{ secrets.FIREBASE_APP_ID_ANDROID }} --token ${{ secrets.FIREBASE_TOKEN }} --groups "test-group"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.15.0
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "🎉 The iOS and Android applications have been successfully uploaded to Firebase App Distribution. Testers in the 'test-group' can now access the builds."
+            }
