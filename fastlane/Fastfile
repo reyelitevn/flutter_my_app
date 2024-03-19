@@ -1,22 +1,30 @@
 lane :bump_version do |options|
-  # Pseudo-code to extract the current version and build number
-  # You'll need to implement this based on your project's specifics
-  current_version, current_build = get_current_version_and_build_from_pubspec()
+  # Read the current version from pubspec.yaml
+  pubspec_path = "./pubspec.yaml"
+  pubspec_content = File.read(pubspec_path)
+  version_match = pubspec_content.match(/version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)/)
+  unless version_match
+    UI.error("Failed to extract version from pubspec.yaml")
+    next
+  end
+  
+  current_version = version_match[1]
+  current_build = version_match[2].to_i
 
-  # Reset build number to 0 if bumping major, minor, or patch
+  # Determine if we're bumping major, minor, or patch and need to reset the build number
   if ['major', 'minor', 'patch'].include?(options[:bump])
     new_build = 0
-    # Modify the bump option to include resetting build number to 0
-    # This assumes your flutter_bump_version action can handle such an input
-    options[:bump] += ",build:0"
   else
-    new_build = current_build # Or however you handle bumping the build number
+    # Assuming bump_build option is a boolean indicating if the build number should be incremented
+    new_build = options[:bump_build] ? current_build + 1 : current_build
   end
 
+  # Call your custom action or any logic to bump version and reset build number
   result = flutter_bump_version(
     bump_build: options[:bump_build],
     parts: options[:bump],
-    pubspec: "./pubspec.yaml"
+    pubspec: pubspec_path,
+    new_build: new_build # Ensure your flutter_bump_version action can accept and handle this parameter
   )
   if(options[:push] || options[:bump])
     sh "git config --global user.email kiyochinh@gmail.com"
