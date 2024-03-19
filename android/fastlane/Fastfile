@@ -2,6 +2,12 @@ default_platform(:android)
 
 platform :android do
 
+  desc "Build release apk"
+  lane :build_release_apk do |options|
+    sh "flutter pub get"
+    sh "flutter build apk --release"
+  end
+
   desc "Submit a new build to Google Play"
   lane :deploy do |options|
     sh "flutter pub get"
