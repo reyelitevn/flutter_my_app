@@ -49,13 +49,31 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.my_app"
+        applicationId "com.kiyochinh.democicd"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+    }
+
+    flavorDimensions "default"
+    productFlavors {
+        develop {
+            manifestPlaceholders = [applicationName: "Dev MyApp"]
+            applicationIdSuffix ".dev"
+            dimension "default"
+        }
+        staging {
+            manifestPlaceholders = [applicationName: "Stg MyApp"]
+            applicationIdSuffix ".stg"
+            dimension "default"
+        }
+        production {
+            manifestPlaceholders = [applicationName: "MyApp"]
+            dimension "default"
+        }
     }
 
     signingConfigs {
@@ -69,7 +87,7 @@ android {
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.dev
+            signingConfig signingConfigs.debug
         }
         release {
             signingConfig signingConfigs.dev
