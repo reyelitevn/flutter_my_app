@@ -187,5 +187,10 @@ jobs:
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
           payload: |
             {
-              "text": "🎉 The iOS and Android applications have been successfully uploaded to Firebase App Distribution. Testers in the 'test-group' can now access the builds."
+              "pretext": "🎉 The iOS and Android applications have been successfully uploaded to Firebase App Distribution. Testers in the 'test-group' can now access the builds.",
+              "payload": {
+                "Build date": "dd/MM/YYYY",
+                "Environment": "Staging",
+                "Version": "v1.0.0"
+              }
             }
