@@ -199,20 +199,20 @@ jobs:
           path: downloaded-artifacts/android
 
       - name: Upload iOS IPA to Firebase App Distribution
-        uses: hasretsariyer/firebase-app-distribution-github-action@v1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
         with:
-          app_id: ${{secrets.FIREBASE_APP_ID_IOS}}
-          firebase_token: ${{secrets.FIREBASE_TOKEN}}
-          app_file: downloaded-artifacts/ios/my_app.ipa
-          tester_groups: reyelite
+          appId: ${{secrets.FIREBASE_APP_ID_IOS}}
+          token: ${{secrets.FIREBASE_TOKEN}}
+          groups: reyelite
+          file: downloaded-artifacts/ios/my_app.ipa
 
       - name: Upload Android APK to Firebase App Distribution
-        uses: hasretsariyer/firebase-app-distribution-github-action@v1
+        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
         with:
-          app_id: ${{secrets.FIREBASE_APP_ID_ANDROID}}
-          firebase_token: ${{secrets.FIREBASE_TOKEN}}
-          app_file: downloaded-artifacts/android/app-release.apk
-          tester_groups: reyelite
+          appId: ${{secrets.FIREBASE_APP_ID_ANDROID}}
+          token: ${{secrets.FIREBASE_TOKEN}}
+          groups: reyelite
+          file: downloaded-artifacts/ios/app-release.apk
 
       - name: Read Changelog Content
         run: |
