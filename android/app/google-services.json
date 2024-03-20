@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "286733922444",
+    "project_id": "reyelitevn-dd667",
+    "storage_bucket": "reyelitevn-dd667.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:286733922444:android:0b56aa0239c48a0c0e8ba9",
+        "android_client_info": {
+          "package_name": "com.example.my_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBtYKOCH4GeFonNfoGGogtabJYDoqkL-Sk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
