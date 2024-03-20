@@ -23,15 +23,12 @@ jobs:
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "2.6"
+          ruby-version: "2.7"
           bundler-cache: true
       - name: Get Flutter dependencies
         run: |
           flutter pub get
           bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
-
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods
 
       - name: Run pod install
         run: |
