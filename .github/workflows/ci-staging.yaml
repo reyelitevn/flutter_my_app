@@ -194,3 +194,46 @@ jobs:
                 "Version": "v1.0.0"
               }
             }
+
+      - name: Send Slack notification
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: 'C02QVRXK30C'
+          payload: |
+            {
+              "text": "GitHub Action failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production deployment check failed* :fire_engine:\n High error rate detected after deployment! Rolling back..."
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": ":github: Failed action"
+                      },
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": ":grafana: Grafana dashboard"
+                      },
+                      "url": "https://<your_organization>.grafana.net/d/my-app-dashboard?from=now-1h&to=now"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
