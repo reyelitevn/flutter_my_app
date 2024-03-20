@@ -30,6 +30,14 @@ jobs:
           flutter pub get
           bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
 
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Run pod install
+        run: |
+          cd ios
+          pod install
+
       - name: Install the Apple certificate and provisioning profile
         env:
           BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
@@ -66,7 +74,6 @@ jobs:
 
           # Build the app for iOS
           flutter build ios --release --no-codesign
-          pod install
           xcodebuild -scheme "Runner" \
           -archivePath $RUNNER_TEMP/Runner.xcarchive \
           -sdk iphoneos \
