@@ -182,20 +182,6 @@ jobs:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v1.15.0
-        with:
-          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
-          payload: |
-            {
-              "pretext": "🎉 The iOS and Android applications have been successfully uploaded to Firebase App Distribution. Testers in the 'test-group' can now access the builds.",
-              "payload": {
-                "Build date": "dd/MM/YYYY",
-                "Environment": "Staging",
-                "Version": "v1.0.0"
-              }
-            }
-
-      - name: Send Slack notification
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
