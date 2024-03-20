@@ -92,11 +92,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
-      - name: Convert labels to track
-        id: git_labels_track
-        run: |
-          dart build-system/git_labels_track.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}
-          bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
+      - name: Bump version before build
+        run: bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
