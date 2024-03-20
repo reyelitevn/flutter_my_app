@@ -98,10 +98,8 @@ jobs:
           ruby-version: "2.7"
           bundler-cache: true
           working-directory: android
-      - name: Get Flutter dependencies
-        run: |
-          flutter pub get
-          bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
+      - name: Bump version for build
+        run: bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
       - name: Configure Keystore
         run: |
           echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
