@@ -159,13 +159,13 @@ jobs:
       - name: Download iOS Artifact
         uses: actions/download-artifact@v2
         with:
-          name: iOS-Artifact
+          name: iOS-app
           path: downloaded-artifacts/ios
 
       - name: Download Android Artifact
         uses: actions/download-artifact@v2
         with:
-          name: Android-Artifact
+          name: Android-app
           path: downloaded-artifacts/android
 
       - name: Install Firebase CLI
@@ -188,4 +188,4 @@ jobs:
           payload: |
             {
               "text": "🎉 The iOS and Android applications have been successfully uploaded to Firebase App Distribution. Testers in the 'test-group' can now access the builds."
-            }
+            }fix
