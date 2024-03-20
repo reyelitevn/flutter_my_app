@@ -97,6 +97,7 @@ jobs:
         with:
           ruby-version: "2.7"
           bundler-cache: true
+          working-directory: android
       - name: Get Flutter dependencies
         run: |
           flutter pub get
