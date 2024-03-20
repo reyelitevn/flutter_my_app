@@ -103,7 +103,6 @@ jobs:
           bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
       - name: Configure Keystore
         run: |
-          cd android
           echo "$PLAY_STORE_UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
           echo "storeFile=upload-keystore.jks" >> key.properties
           echo "keyAlias=$KEYSTORE_KEY_ALIAS" >> key.properties
