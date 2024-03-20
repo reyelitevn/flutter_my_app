@@ -142,7 +142,6 @@ jobs:
         run: |
           git config --global user.email "kiyochinh@gmail.com"
           git config --global user.name "Kiyo Chính"
-          git config --global http.https://github.com/.extraheader "AUTHORIZATION: basic ${{ secrets.REPO_TOKEN }}"
 
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
