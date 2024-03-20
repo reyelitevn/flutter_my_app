@@ -198,21 +198,14 @@ jobs:
           name: Android-app
           path: downloaded-artifacts/android
 
-      - name: Upload iOS IPA to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
-        with:
-          appId: ${{secrets.FIREBASE_APP_ID_IOS}}
-          token: ${{secrets.FIREBASE_TOKEN}}
-          groups: reyelite
-          file: downloaded-artifacts/ios/my_app.ipa
+      - name: Install Firebase CLI
+        run: curl -sL firebase.tools | bash
 
-      - name: Upload Android APK to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1.3.2
-        with:
-          appId: ${{secrets.FIREBASE_APP_ID_ANDROID}}
-          token: ${{secrets.FIREBASE_TOKEN}}
-          groups: reyelite
-          file: downloaded-artifacts/ios/app-release.apk
+      # - name: Upload iOS IPA to Firebase App Distribution
+      #   run: firebase appdistribution:distribute downloaded-artifacts/ios/my_app.ipa --app ${{ secrets.FIREBASE_APP_ID_IOS }} --token ${{ secrets.FIREBASE_TOKEN }}
+
+      # - name: Upload Android APK to Firebase App Distribution
+      #   run: firebase appdistribution:distribute downloaded-artifacts/android/app-release.apk --app ${{ secrets.FIREBASE_APP_ID_ANDROID }} --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Read Changelog Content
         run: |
