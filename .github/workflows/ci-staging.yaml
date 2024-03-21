@@ -149,15 +149,15 @@ jobs:
           KEYSTORE_STORE_PASSWORD: ${{ secrets.KEYSTORE_STORE_PASSWORD }}
         working-directory: android
 
-      - name: Build apk
-        run: bundle exec fastlane android build_release_apk
-        working-directory: android
+      - name: Build release apk
+        run: flutter build apk --release --flavor ${{ env.FLAVOR }} --dart-define FLAVOR=${{ env.FLAVOR }}
+        working-directory: .
 
       - name: Upload application
         uses: actions/upload-artifact@v3
         with:
           name: Android-app
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-${{ env.FLAVOR }}-release.apk
           retention-days: 3
 
   commit_version_bump:
