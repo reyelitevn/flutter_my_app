@@ -61,12 +61,12 @@ android {
     flavorDimensions "default"
     productFlavors {
         develop {
-            manifestPlaceholders = [applicationName: "Dev MyApp"]
+            manifestPlaceholders = [applicationName: "[DEV] MyApp"]
             applicationIdSuffix ".dev"
             dimension "default"
         }
         staging {
-            manifestPlaceholders = [applicationName: "Stg MyApp"]
+            manifestPlaceholders = [applicationName: "[STG] MyApp"]
             applicationIdSuffix ".stg"
             dimension "default"
         }

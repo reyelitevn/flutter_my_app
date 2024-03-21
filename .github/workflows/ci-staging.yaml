@@ -16,6 +16,35 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - name: Fetch Pull Request Labels and Filter
+        id: pr_labels
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const labels = await github.rest.pulls.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const relevantLabels = labels.data
+              .map(label => label.name)
+              .filter(name => ['develop', 'staging', 'production'].includes(name))
+              .join(' ');
+            return relevantLabels;
+
+      - name: Set Flavor Based on Label
+        run: |
+          LABELS="${{ steps.pr_labels.outputs.result }}"
+          if [[ "$LABELS" == *"staging"* ]]; then
+            echo "FLAVOR=staging" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"production"* ]]; then
+            echo "FLAVOR=production" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"develop"* ]]; then
+            echo "FLAVOR=develop" >> $GITHUB_ENV
+          else
+            echo "FLAVOR=develop" >> $GITHUB_ENV # Default to develop if no specific label is found
+          fi
+
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -70,7 +99,7 @@ jobs:
         run: |
           EXPORT_OPTS_PATH=$RUNNER_TEMP/ExportOptions.plist
           echo -n "$EXPORT_OPTIONS_PLIST" | base64 --decode -o $EXPORT_OPTS_PATH
-          flutter build ipa --export-options-plist=$EXPORT_OPTS_PATH
+          flutter build ipa --export-options-plist=$EXPORT_OPTS_PATH --flavor ${{ env.FLAVOR }}
       
       - name: Upload application
         uses: actions/upload-artifact@v3
@@ -226,7 +255,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: ${{ secrets.SLACK_MENTIONS }}\n\n*CHANGE LOGS 👀*\n```${{ env.CHANGELOG }}```"
+                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: ${{ secrets.SLACK_MENTIONS_QA }}\n\n*CHANGE LOGS 👀*\n```${{ env.CHANGELOG }}```"
                   }
                 },
                 {

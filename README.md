@@ -35,6 +35,9 @@ Welcome to the Flutter CI/CD & Branching Template, crafted to enhance your Flutt
    - `REPO_TOKEN`: Your GitHub personal access token.
    - Keystore details: `KEYSTORE_STORE_PASSWORD`, `KEYSTORE_KEY_PASSWORD`, `KEYSTORE_KEY_ALIAS`.
    - Google Cloud & Play Store: `GCP_SA_KEY`, `PLAY_STORE_CONFIG_JSON`.
+   - `SLACK_MENTIONS_DEV`: [{"github-id": "slack-id"}]
+   - `SLACK_MENTIONS_QA`: "<@slack-id>, <@slack-id>"
+   - `SLACK_CHANNEL_DEV`, `SLACK_CHANNEL_QA`, `SLACK_WEBHOOK_URL`
 3. **Label Setup:** Create versioning (`major`, `minor`, `patch`) and tracking (`production`, `staging`, `develop`) labels as required.
 
 ## Workflow Guidance
