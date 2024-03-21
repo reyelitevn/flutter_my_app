@@ -119,6 +119,36 @@ jobs:
       - run: flutter doctor -v
       - name: Checkout Repo
         uses: actions/checkout@v3
+
+      - name: Fetch Pull Request Labels and Filter
+        id: pr_labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const filteredLabels = labels.data
+              .map(label => label.name)
+              .filter(name => ['develop', 'staging', 'production'].includes(name))
+              .join(' ');
+            return filteredLabels;
+
+      - name: Set Flavor Based on Label
+        run: |
+          LABELS="${{ steps.pr_labels.outputs.result }}"
+          if [[ "$LABELS" == *"staging"* ]]; then
+            echo "FLAVOR=staging" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"production"* ]]; then
+            echo "FLAVOR=production" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"develop"* ]]; then
+            echo "FLAVOR=develop" >> $GITHUB_ENV
+          else
+            echo "FLAVOR=develop" >> $GITHUB_ENV # Default to develop if no specific label is found
+          fi
+
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
       - name: Setup Fastlane (Root Directory)
