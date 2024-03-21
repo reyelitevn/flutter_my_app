@@ -45,7 +45,7 @@ jobs:
           OTHER_MENTIONS_SLACK_IDS=$(echo $OTHER_MENTIONS_SLACK_IDS | sed 's/, $//')
           
           # Construct the message payload with dynamic mentions
-          MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} CC: $OTHER_MENTIONS_SLACK_IDS\"}"
+          MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} \nCc: $OTHER_MENTIONS_SLACK_IDS\"}"
           echo "::set-output name=message::$MESSAGE"
         env:
           SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
@@ -77,15 +77,20 @@ jobs:
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       - uses: subosito/flutter-action@v2
+        if: github.event.action == 'opened'
 
       - name: Get flutter dependencies
         run: flutter pub get
+        if: github.event.action == 'opened'
 
       - name: Check for any formatting issues in the code
         run: dart format --set-exit-if-changed .
+        if: github.event.action == 'opened'
 
       - name: Statically analyze the Dart code for any errors
         run: dart analyze
+        if: github.event.action == 'opened'
 
       - name: Run Tests
         run: flutter test
+        if: github.event.action == 'opened'
