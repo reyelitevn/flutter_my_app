@@ -156,7 +156,7 @@ jobs:
 
   distribute_to_firebase:
     name: Distribute to Firebase
-    needs: [build_ios, build_android]
+    needs: [commit_version_bump]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -168,8 +168,8 @@ jobs:
           python-version: '3.9'
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
-      - name: Get Project Version
 
+      - name: Get Project Version
         run: "dart build-system/project_version.dart"
         
       - name: Install Dependencies
@@ -217,7 +217,7 @@ jobs:
         id: slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: 'C02QVRXK30C'
+          channel-id: ${{ secrets.SLACK_CHANNEL_QA }}
           payload: |
             {
               "text": "GitHub Action",
@@ -226,7 +226,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: `<@U02AVTWUSLS>`, `<@U02TEAA24EB>`, `<@U03AA0A3DUG>`\n\n*CHANGE LOGS 👀*\n```${{ env.CHANGELOG }}```"
+                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: ${{ secrets.SLACK_MENTIONS }}\n\n*CHANGE LOGS 👀*\n```${{ env.CHANGELOG }}```"
                   }
                 },
                 {
@@ -238,7 +238,7 @@ jobs:
                         "type": "plain_text",
                         "text": ":ios: Download iOS"
                       },
-                      "url": "https://console.firebase.google.com/u/0/project/reyelitevn-dd667/appdistribution/app/ios:com.kiyochinh.democicd/releases"
+                      "url": ${{ secrets.FIREBASE_LINK_IOS }}
                     },
                     {
                       "type": "button",
@@ -246,7 +246,7 @@ jobs:
                         "type": "plain_text",
                         "text": ":android: Download Android"
                       },
-                      "url": "https://console.firebase.google.com/u/0/project/reyelitevn-dd667/appdistribution/app/android:com.example.my_app/releases"
+                      "url": ${{ secrets.FIREBASE_LINK_ANDROID }}
                     }
                   ]
                 }
