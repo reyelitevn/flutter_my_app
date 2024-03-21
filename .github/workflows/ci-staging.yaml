@@ -331,51 +331,47 @@ jobs:
       - name: Upload Android APK to Firebase App Distribution
         run: firebase appdistribution:distribute downloaded-artifacts/android/app-${{ env.FLAVOR }}-release.apk --app ${{ secrets.FIREBASE_APP_ID_ANDROID }} --token ${{ secrets.FIREBASE_TOKEN }}
 
-      - name: Read Changelog Content
-        run: |
-          printf "CHANGELOG=" >> $GITHUB_ENV
-          cat changelog.txt | awk '{printf "%s\\n", $0}' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Send Slack notification
-        id: slack
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          channel-id: ${{ secrets.SLACK_CHANNEL_QA }}
-          payload: >-
+    - name: Send Slack Notification with Curl
+      run: |
+        SLACK_WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
+        # Note: Direct use of $CHANGELOG_CONTENT in the payload for curl
+        PAYLOAD=$(cat <<EOF
+    {
+      "channel": "${{ secrets.SLACK_CHANNEL_QA }}",
+      "text": "GitHub Action",
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\\nCc: ${{ secrets.SLACK_MENTIONS_QA }}\\n\\n*CHANGE LOGS 👀*\\n\`\`\`${CHANGELOG_CONTENT}\`\`\`"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
             {
-              "text": "GitHub Action",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: " + "${{ secrets.SLACK_MENTIONS_QA }}" + "\n\n*CHANGE LOGS 👀*\n```" + "${{ env.CHANGELOG }}" + "```"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": ":ios: Download iOS"
-                      },
-                      "url": "${{ secrets.FIREBASE_LINK_IOS }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": ":android: Download Android"
-                      },
-                      "url": "${{ secrets.FIREBASE_LINK_ANDROID }}"
-                    }
-                  ]
-                }
-              ]
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": ":ios: Download iOS"
+              },
+              "url": "${{ secrets.FIREBASE_LINK_IOS }}"
+            },
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": ":android: Download Android"
+              },
+              "url": "${{ secrets.FIREBASE_LINK_ANDROID }}"
             }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          ]
+        }
+      ]
+    }
+    EOF
+    )
+        curl -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+      env:
+        CHANGELOG_CONTENT: ${{ env.CHANGELOG_CONTENT }}
