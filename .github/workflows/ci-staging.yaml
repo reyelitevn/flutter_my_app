@@ -333,8 +333,8 @@ jobs:
 
       - name: Prepare Changelog Content for Slack
         run: |
-          # Prepare the changelog content with escaped newlines for Slack formatting
-          CHANGELOG_CONTENT=$(cat changelog.txt | sed ':a;N;$!ba;s/\n/\\n/g')
+          # Remove leading and trailing whitespace and replace newlines with \n for Slack formatting
+          CHANGELOG_CONTENT=$(cat changelog.txt | sed 's/^[ \t]*//;s/[ \t]*$//' | tr -s '\n' ' ' | sed ':a;N;$!ba;s/\n/\\n/g')
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
           echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
