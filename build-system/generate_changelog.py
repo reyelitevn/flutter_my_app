@@ -26,11 +26,11 @@ commits = repo.get_commits(sha="staging")
 for commit in commits:
     if version_pattern.search(commit.commit.message):
         version_bump_commit = commit
-        print(f"Found version bump commit: {commit.sha} - {commit.commit.message}")
+        # print(f"Found version bump commit: {commit.sha} - {commit.commit.message}")
         break
 
 if not version_bump_commit:
-    print(f"Version bump to {target_version} not found.")
+    # print(f"Version bump to {target_version} not found.")
     exit(1)
 
 prs = repo.get_pulls(base="staging", state="closed", sort="created", direction="desc")
@@ -55,16 +55,16 @@ for pr in prs:
             if not categorized:
                 categorized_prs["Other Changes"].append(pr)
 
-changelog = f"## Changelog since version {target_version}\n"
+changelog = f"## Changelog since version {target_version}\\n"
 is_changelog_empty = True
 for category, prs in categorized_prs.items():
     if prs:  # Only include categories with PRs
         is_changelog_empty = False
-        changelog += f"\n### {category}\n"
+        changelog += f"\\n### {category}\\n"
         for pr in prs:
-            changelog += f"- {pr.title} #{pr.number}\n"
+            changelog += f"- {pr.title} #{pr.number}\\n"
 
 if is_changelog_empty:
-    changelog += "\n- Em chịu, không biết có update gì hong, đợi dev vào report nha mn :hehe-dog:"
+    changelog += "\\n- Em chịu, không biết có update gì hong, đợi dev vào report nha mn :hehe-dog:"
 
 print(changelog)
