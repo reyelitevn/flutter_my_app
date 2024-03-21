@@ -265,7 +265,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install PyGithub  # Ensure PyGithub is installed
       
+      - name: Fetch Pull Request Labels and Check for Changelog Label
+        id: pr_labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const hasChangelogsLabel = labels.data
+              .map(label => label.name.toLowerCase())
+              .includes('changelog');
+            return hasChangelogsLabel;
+
       - name: Fetch Pull Request Details
+        if: steps.pr_labels.outputs.result == 'true'
         id: pr_details
         uses: actions/github-script@v7
         with:
@@ -275,21 +291,18 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
-            const hasChangelogsLabel = pr.data.labels.some(label => label.name === 'changelog');
-            return {
-              hasChangelogsLabel,
-              body: pr.data.body
-            };
+            return pr.data.body;
 
       - name: Append PR Description to Changelog
-        if: steps.pr_details.outputs.hasChangelogsLabel == 'true'
+        if: steps.pr_labels.outputs.result == 'true'
         run: |
-          printf "%s\n" "${{ steps.pr_details.outputs.body }}" >> changelog.txt
+          printf "%s\n" "${{ steps.pr_details.outputs.result }}" >> changelog.txt
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Generate Changelog
+        if: steps.pr_labels.outputs.result == 'false'
         run: |
           python build-system/generate_changelog.py >> changelog.txt
         env:
@@ -329,7 +342,7 @@ jobs:
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: ${{ secrets.SLACK_CHANNEL_QA }}
-          payload: |
+          payload: >-
             {
               "text": "GitHub Action",
               "blocks": [
@@ -337,7 +350,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: ${{ secrets.SLACK_MENTIONS_QA }}\n\n*CHANGE LOGS 👀*\n```${{ env.CHANGELOG }}```"
+                    "text": "*Team Mobile vừa deploy thành công v${{ env.version_name }}.${{ env.version_code }}* :tada:\nCc: " + "${{ secrets.SLACK_MENTIONS_QA }}" + "\n\n*CHANGE LOGS 👀*\n```" + "${{ env.CHANGELOG }}" + "```"
                   }
                 },
                 {
@@ -349,7 +362,7 @@ jobs:
                         "type": "plain_text",
                         "text": ":ios: Download iOS"
                       },
-                      "url": ${{ secrets.FIREBASE_LINK_IOS }}
+                      "url": "${{ secrets.FIREBASE_LINK_IOS }}"
                     },
                     {
                       "type": "button",
@@ -357,7 +370,7 @@ jobs:
                         "type": "plain_text",
                         "text": ":android: Download Android"
                       },
-                      "url": ${{ secrets.FIREBASE_LINK_ANDROID }}
+                      "url": "${{ secrets.FIREBASE_LINK_ANDROID }}"
                     }
                   ]
                 }
