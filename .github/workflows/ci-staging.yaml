@@ -222,7 +222,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Fetch Pull Request Labels and Filter
-        id: pr_labels_native
+        id: pr_labels_native_filter
         uses: actions/github-script@v7
         with:
           script: |
@@ -239,7 +239,7 @@ jobs:
 
       - name: Set Flavor Based on Label
         run: |
-          LABELS="${{ steps.pr_labels_native.outputs.result }}"
+          LABELS="${{ steps.pr_labels_native_filter.outputs.result }}"
           if [[ "$LABELS" == *"staging"* ]]; then
             echo "FLAVOR=staging" >> $GITHUB_ENV
           elif [[ "$LABELS" == *"production"* ]]; then
@@ -247,8 +247,7 @@ jobs:
           elif [[ "$LABELS" == *"develop"* ]]; then
             echo "FLAVOR=develop" >> $GITHUB_ENV
           else
-            echo "FLAVOR=develop" >> $GITHUB_ENV # Default to develop if no specific label is found
-          fi
+            echo "FLAVOR=develop" >> $GITHUB_ENV
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -266,7 +265,7 @@ jobs:
           pip install PyGithub  # Ensure PyGithub is installed
       
       - name: Fetch Pull Request Labels and Check for Changelog Label
-        id: pr_labels_native
+        id: pr_labels_native_changelog
         uses: actions/github-script@v7
         with:
           script: |
@@ -281,7 +280,7 @@ jobs:
             return hasChangelogsLabel;
 
       - name: Fetch Pull Request Details
-        if: steps.pr_labels_native.outputs.result == 'true'
+        if: steps.pr_labels_native_changelog.outputs.result == 'true'
         id: pr_details
         uses: actions/github-script@v7
         with:
@@ -294,19 +293,19 @@ jobs:
             return pr.data.body;
 
       - name: Append PR Description to Changelog
-        if: steps.pr_labels_native.outputs.result == 'true'
+        if: steps.pr_labels_native_changelog.outputs.result == 'true'
         run: |
           printf "%s\n" "${{ steps.pr_details.outputs.result }}" >> changelog.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Generate Changelog
-        if: steps.pr_labels_native.outputs.result == 'false'
+        if: steps.pr_labels_native_changelog.outputs.result == 'false'
         run: |
           python build-system/generate_changelog.py >> changelog.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           TARGET_VERSION: ${{ env.version_name }}+${{ env.version_code }}
 
