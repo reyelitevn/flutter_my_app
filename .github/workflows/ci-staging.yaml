@@ -21,16 +21,16 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const labels = await github.rest.pulls.listLabelsOnIssue({
+            const labels = await github.rest.pulls.listLabelsOnPullRequest({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.issue.number,
+              pull_number: context.issue.number,
             });
-            const relevantLabels = labels.data
+            const filteredLabels = labels.data
               .map(label => label.name)
               .filter(name => ['develop', 'staging', 'production'].includes(name))
               .join(' ');
-            return relevantLabels;
+            return filteredLabels;
 
       - name: Set Flavor Based on Label
         run: |
@@ -206,10 +206,33 @@ jobs:
           python -m pip install --upgrade pip
           pip install PyGithub  # Ensure PyGithub is installed
       
-      - name: Generate Changelog
-        id: generate_changelog
+      - name: Fetch Pull Request Details
+        id: pr_details
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            const hasChangelogsLabel = pr.data.labels.some(label => label.name === 'Changelog');
+            return {
+              hasChangelogsLabel,
+              body: pr.data.body
+            };
+
+      - name: Append PR Description to Changelog
+        if: steps.pr_details.outputs.hasChangelogsLabel == 'true'
         run: |
-          python build-system/generate_changelog.py > changelog.txt
+          printf "%s\n" "${{ steps.pr_details.outputs.body }}" >> changelog.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+
+      - name: Generate Changelog
+        run: |
+          python build-system/generate_changelog.py >> changelog.txt
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
