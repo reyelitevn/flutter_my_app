@@ -333,10 +333,10 @@ jobs:
 
       - name: Prepare Changelog Content for Slack
         run: |
-          # Remove leading and trailing whitespace and replace newlines with \n for Slack formatting
-          CHANGELOG_CONTENT=$(cat changelog.txt | sed 's/^[ \t]*//;s/[ \t]*$//' | tr -s '\n' ' ' | sed ':a;N;$!ba;s/\n/\\n/g')
+          # Use awk to condense content to a single line and replace newlines with \n, preserving whitespace correctly
+          CHANGELOG_CONTENT=$(awk '{printf "%s\\n", $0}' changelog.txt | sed ':a;N;$!ba;s/\\n$//')
           echo "CHANGELOG_CONTENT<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG_CONTENT" >> $GITHUB_ENV
+          echo -n "$CHANGELOG_CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Send Slack notification
