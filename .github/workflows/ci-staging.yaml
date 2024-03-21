@@ -257,6 +257,14 @@ jobs:
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
 
+      - name: Setup Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "2.7"
+          bundler-cache: true
+      - name: Get Flutter dependencies
+        run: bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
+
       - name: Get Project Version
         run: "dart build-system/project_version.dart"
         
