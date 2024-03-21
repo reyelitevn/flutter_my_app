@@ -266,7 +266,7 @@ jobs:
           pip install PyGithub  # Ensure PyGithub is installed
       
       - name: Fetch Pull Request Labels and Check for Changelog Label
-        id: pr_labels
+        id: pr_labels_native
         uses: actions/github-script@v7
         with:
           script: |
