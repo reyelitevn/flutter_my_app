@@ -296,7 +296,7 @@ jobs:
       - name: Append PR Description to Changelog
         if: steps.pr_labels_native_changelog.outputs.result == 'true'
         run: |
-          printf "%s\n" "${{ steps.pr_details.outputs.result }}" >> changelog.txt
+          echo "${{ steps.pr_details.outputs.body }}" >> changelog.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -333,8 +333,8 @@ jobs:
 
       - name: Read Changelog Content
         run: |
-          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          cat changelog.txt >> $GITHUB_ENV
+          printf "CHANGELOG=" >> $GITHUB_ENV
+          cat changelog.txt | awk '{printf "%s\\n", $0}' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: Send Slack notification
