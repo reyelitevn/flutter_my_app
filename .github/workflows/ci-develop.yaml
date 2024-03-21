@@ -13,19 +13,44 @@ jobs:
     name: Analyze code and test
     runs-on: ubuntu-latest
     steps:
-    # Checkout Repo code
-    - name: Checkout Repo
-      uses: actions/checkout@v3
-    # Setup the flutter environment.
-    - uses: subosito/flutter-action@v2
-    - name: Get flutter dependencies.
-      run: flutter pub get
+      - name: Checkout Repo
+        uses: actions/checkout@v3
 
-    - name: Check for any formatting issues in the code.
-      run: dart format --set-exit-if-changed .
+      - name: Send PR notification to Slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          channel-id: 'C02QVRXK30C'
+          payload: ${{ toJson(steps.pr_notification.outputs.message) }}
+        env:
+          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR"}'
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        id: slack_notification
 
-    - name: Statically analyze the Dart code for any errors.
-      run: dart analyze
+      - name: Prepare PR notification message
+        id: pr_notification
+        run: |
+          MENTIONS_JSON=$SLACK_MENTIONS
+          PR_AUTHOR=${{ github.event.pull_request.user.login }}
+          # Assuming the GitHub ID to Slack ID mapping is in the format {"github-id": "slack-id", ...}
+          PR_AUTHOR_SLACK_ID=$(echo $MENTIONS_JSON | jq -r ".[\"$PR_AUTHOR\"]")
+          # Prepare other mentions (you can adjust this as per your needs)
+          OTHER_MENTIONS_SLACK_IDS="<@slack-id2>, <@slack-id3>"
+          # Construct the message payload
+          MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} CC: $OTHER_MENTIONS_SLACK_IDS\"}"
+          echo "::set-output name=message::$MESSAGE"
+        shell: bash
 
-    - name: Run Tests
-      run: flutter test
+      - uses: subosito/flutter-action@v2
+
+      - name: Get flutter dependencies
+        run: flutter pub get
+
+      - name: Check for any formatting issues in the code
+        run: dart format --set-exit-if-changed .
+
+      - name: Statically analyze the Dart code for any errors
+        run: dart analyze
+
+      - name: Run Tests
+        run: flutter test
