@@ -2,6 +2,7 @@ name: CI Develop
 
 on:
   pull_request:
+    types: [opened, closed]
     branches:
       - develop
     paths: 
@@ -16,7 +17,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Prepare PR notification message
+      # Conditionally prepare notification message for new PR
+      - name: Prepare PR Opened Notification Message
+        if: github.event.action == 'opened'
         id: pr_notification
         run: |
           # Define the mapping of GitHub usernames to Slack IDs as a JSON string
@@ -48,11 +51,27 @@ jobs:
           SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
         shell: bash
 
+      # Conditionally prepare notification message for merged PR
+      - name: Prepare PR Merged Notification Message
+        if: github.event.action == 'closed' && github.event.pull_request.merged == true
+        id: pr_merged_notification
+        run: |
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          MENTIONS_JSON='${{ env.SLACK_MENTIONS }}'
+          PR_AUTHOR_SLACK_ID=$(echo $MENTIONS_JSON | jq -r ".[\"$PR_AUTHOR\"]")
+          MESSAGE="{\"text\": \"The PR has been merged, <@$PR_AUTHOR_SLACK_ID> please update the ticket!\"}"
+          echo "::set-output name=message::$MESSAGE"
+        env:
+          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
+        shell: bash
+      
+      # Send notification to Slack
       - name: Send PR notification to Slack
+        if: steps.pr_notification.outputs.message || steps.pr_merged_notification.outputs.message
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: 'C02QVRXK30C'
-          payload: ${{ steps.pr_notification.outputs.message }}
+          payload: ${{ steps.pr_notification.outputs.message || steps.pr_merged_notification.outputs.message }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
