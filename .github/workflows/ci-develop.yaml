@@ -16,30 +16,46 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - name: Prepare PR notification message
+        id: pr_notification
+        run: |
+          # Define the mapping of GitHub usernames to Slack IDs as a JSON string
+          MENTIONS_JSON='${{ env.SLACK_MENTIONS }}'
+          # Get the GitHub login of the PR author
+          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+          # Extract the Slack ID of the PR author from the mapping
+          PR_AUTHOR_SLACK_ID=$(echo $MENTIONS_JSON | jq -r ".[\"$PR_AUTHOR\"]")
+          # Initialize an empty string for the mentions excluding the PR author
+          OTHER_MENTIONS_SLACK_IDS=""
+          
+          # Loop through each GitHub username in the mapping
+          for GITHUB_ID in $(echo $MENTIONS_JSON | jq -r 'keys[]'); do
+            # Skip the PR author
+            if [ "$GITHUB_ID" != "$PR_AUTHOR" ]; then
+              # Append the corresponding Slack ID to the mentions string
+              SLACK_ID=$(echo $MENTIONS_JSON | jq -r ".[\"$GITHUB_ID\"]")
+              OTHER_MENTIONS_SLACK_IDS+="<@$SLACK_ID>, "
+            fi
+          done
+          
+          # Remove the trailing comma and space from the mentions string
+          OTHER_MENTIONS_SLACK_IDS=$(echo $OTHER_MENTIONS_SLACK_IDS | sed 's/, $//')
+          
+          # Construct the message payload with dynamic mentions
+          MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} CC: $OTHER_MENTIONS_SLACK_IDS\"}"
+          echo "::set-output name=message::$MESSAGE"
+        env:
+          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
+        shell: bash
+
       - name: Send PR notification to Slack
         uses: slackapi/slack-github-action@v1.24.0
         with:
           channel-id: 'C02QVRXK30C'
-          payload: ${{ toJson(steps.pr_notification.outputs.message) }}
+          payload: ${{ steps.pr_notification.outputs.message }}
         env:
-          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR"}'
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-        id: slack_notification
-
-      - name: Prepare PR notification message
-        id: pr_notification
-        run: |
-          MENTIONS_JSON=$SLACK_MENTIONS
-          PR_AUTHOR=${{ github.event.pull_request.user.login }}
-          # Assuming the GitHub ID to Slack ID mapping is in the format {"github-id": "slack-id", ...}
-          PR_AUTHOR_SLACK_ID=$(echo $MENTIONS_JSON | jq -r ".[\"$PR_AUTHOR\"]")
-          # Prepare other mentions (you can adjust this as per your needs)
-          OTHER_MENTIONS_SLACK_IDS="<@slack-id2>, <@slack-id3>"
-          # Construct the message payload
-          MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} CC: $OTHER_MENTIONS_SLACK_IDS\"}"
-          echo "::set-output name=message::$MESSAGE"
-        shell: bash
 
       - uses: subosito/flutter-action@v2
 
