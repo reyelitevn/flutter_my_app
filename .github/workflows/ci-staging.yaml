@@ -248,6 +248,7 @@ jobs:
             echo "FLAVOR=develop" >> $GITHUB_ENV
           else
             echo "FLAVOR=develop" >> $GITHUB_ENV
+          fi
       
       - name: Set up Python
         uses: actions/setup-python@v4
