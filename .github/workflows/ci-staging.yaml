@@ -220,6 +220,35 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Fetch Pull Request Labels and Filter
+        id: pr_labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const filteredLabels = labels.data
+              .map(label => label.name)
+              .filter(name => ['develop', 'staging', 'production'].includes(name))
+              .join(' ');
+            return filteredLabels;
+
+      - name: Set Flavor Based on Label
+        run: |
+          LABELS="${{ steps.pr_labels.outputs.result }}"
+          if [[ "$LABELS" == *"staging"* ]]; then
+            echo "FLAVOR=staging" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"production"* ]]; then
+            echo "FLAVOR=production" >> $GITHUB_ENV
+          elif [[ "$LABELS" == *"develop"* ]]; then
+            echo "FLAVOR=develop" >> $GITHUB_ENV
+          else
+            echo "FLAVOR=develop" >> $GITHUB_ENV # Default to develop if no specific label is found
+          fi
       
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -287,7 +316,7 @@ jobs:
         run: firebase appdistribution:distribute downloaded-artifacts/ios/my_app.ipa --app ${{ secrets.FIREBASE_APP_ID_IOS }} --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Upload Android APK to Firebase App Distribution
-        run: firebase appdistribution:distribute downloaded-artifacts/android/app-release.apk --app ${{ secrets.FIREBASE_APP_ID_ANDROID }} --token ${{ secrets.FIREBASE_TOKEN }}
+        run: firebase appdistribution:distribute downloaded-artifacts/android/app-${{ env.FLAVOR }}-release.apk --app ${{ secrets.FIREBASE_APP_ID_ANDROID }} --token ${{ secrets.FIREBASE_TOKEN }}
 
       - name: Read Changelog Content
         run: |
