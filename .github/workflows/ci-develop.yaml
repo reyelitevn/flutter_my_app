@@ -48,7 +48,7 @@ jobs:
           MESSAGE="{\"text\": \"New PR from <@$PR_AUTHOR_SLACK_ID> needs review: ${{ github.event.pull_request.html_url }} \nCc: $OTHER_MENTIONS_SLACK_IDS\"}"
           echo "::set-output name=message::$MESSAGE"
         env:
-          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
+          SLACK_MENTIONS: ${{ secrets.SLACK_MENTIONS_DEV }}
         shell: bash
 
       # Conditionally prepare notification message for merged PR
@@ -62,7 +62,7 @@ jobs:
           MESSAGE="{\"text\": \"The PR has been merged, <@$PR_AUTHOR_SLACK_ID> please update the ticket!\"}"
           echo "::set-output name=message::$MESSAGE"
         env:
-          SLACK_MENTIONS: '{"kiyochinh": "U02ASTKAKSR", "member2": "U02ASTKAKSR", "member3": "U02ASTKAKSR"}'
+          SLACK_MENTIONS: ${{ secrets.SLACK_MENTIONS_DEV }}
         shell: bash
       
       # Send notification to Slack
@@ -70,7 +70,7 @@ jobs:
         if: steps.pr_notification.outputs.message || steps.pr_merged_notification.outputs.message
         uses: slackapi/slack-github-action@v1.24.0
         with:
-          channel-id: 'C02QVRXK30C'
+          channel-id: ${{ secrets.SLACK_CHANNEL_DEV }}
           payload: ${{ steps.pr_notification.outputs.message || steps.pr_merged_notification.outputs.message }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
