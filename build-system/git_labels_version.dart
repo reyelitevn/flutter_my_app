@@ -7,7 +7,7 @@ Future<void> main(List<String> labels) async {
   String parts = "";
   if (versionParts.isNotEmpty) {
     parts = versionParts.join(",");
-    parts = "parts=bump:$parts";
+    parts = "parts=parts:$parts";
   }
   await setOutput(parts);
 }

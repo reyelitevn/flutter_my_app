@@ -1,17 +1,18 @@
 lane :bump_version do |options|
   result = flutter_bump_version(
-    bump_build:options[:bump_build],
-    parts: options[:bump],
+    bump_build: options[:bump_build],
+    parts: options[:parts],
     pubspec: "./pubspec.yaml"
   )
-  if(options[:push] || options[:bump])
+
+  if options[:push] || options[:parts]
     sh "git config --global user.email kiyochinh@gmail.com"
     sh "git config --global user.name Kiyo Chinh"
     sh "git config --global push.followTags true"
-    sh "git add ../pubspec.yaml"
-    sh 'git commit -m "[Chore] Bump version from '+result[:previous]+ ' to ' + result[:new] + '"'
-    sh 'git tag -a v' + result[:new].gsub('+', '.') + ' -m "Version ' + result[:new].gsub('+', '.') + '"'
-    sh 'git pull --rebase origin '+options[:branch]
-    sh "git push origin HEAD:"+options[:branch]
+    sh "git add ../pubspec.yaml"  # Adjusted path
+    sh "git commit -m '[Chore] Bump version from #{result[:previous]} to #{result[:new]}'"
+    sh "git tag -a v#{result[:new].gsub('+', '.')} -m 'Version #{result[:new].gsub('+', '.')}'"
+    sh "git pull --rebase origin #{options[:branch]}"
+    sh "git push https://#{ENV['GITHUB_TOKEN']}:x-oauth-basic@github.com/#{ENV['GITHUB_REPOSITORY']} HEAD:#{options[:branch]}"
   end
 end
