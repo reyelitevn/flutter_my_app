@@ -32,6 +32,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          parts=$(echo "${{ steps.version_parts.outputs.parts }}" | sed 's/bump=//')
-          bundle exec fastlane bump_version branch:${{ github.head_ref }} parts:$parts bump_build:false
+          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false
         working-directory: .
