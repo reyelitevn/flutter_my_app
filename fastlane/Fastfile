@@ -14,6 +14,6 @@ lane :bump_version do |options|
     sh "git commit -m '[Chore] Bump version from #{result[:previous]} to #{result[:new]}'"
     sh "git tag -a v#{result[:new].gsub('+', '.')} -m 'Version #{result[:new].gsub('+', '.')}'"
     sh "git pull --rebase origin #{options[:branch]}"
-    sh "python build-system/push_changes.py \"${{ secrets.REPO_TOKEN }}\" \"${{ github.repository }}\" \"#{options[:branch]}\""
+    sh "python build-system/push_changes.py \"#{ENV['GITHUB_TOKEN']}\" \"#{ENV['GITHUB_REPOSITORY']}\" \"#{options[:branch]}\""
   end
 end
