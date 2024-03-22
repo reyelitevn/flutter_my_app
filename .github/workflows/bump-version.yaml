@@ -11,6 +11,9 @@ jobs:
   bump_version_based_on_labels:
     name: Bump version based on labels
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
@@ -28,14 +31,6 @@ jobs:
         with:
           ruby-version: "2.6"
           bundler-cache: true
-      
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install GitPython
-        run: pip3 install GitPython
       
       # Call Fastlane bump_version for Flutter
       - name: Bump version via fastlane for Flutter
