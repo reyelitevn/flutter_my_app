@@ -32,5 +32,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false
+          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false || python build-system/push_changes.py
         working-directory: .
