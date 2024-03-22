@@ -9,22 +9,34 @@ on:
 
 jobs:
   bump_version_based_on_labels:
+    name: Bump version based on labels
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+      
       - name: Setup Dart Language
         uses: dart-lang/setup-dart@v1.3
+      
       - name: Convert labels to version parts
         id: version_parts
         run: dart build-system/git_labels_version.dart ${{ join(github.event.pull_request.labels.*.name,' ') }}
-      # Setup Ruby, Bundler, Gemfile for Fastlane
-      - name: Setup Fastlane
+      
+      - name: Setup Ruby, Bundler, Gemfile for Fastlane
         if: env.parts != ''
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: "2.6"
           bundler-cache: true
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install GitPython
+        run: pip3 install GitPython
+      
       # Call Fastlane bump_version for Flutter
       - name: Bump version via fastlane for Flutter
         if: env.parts != ''
@@ -32,5 +44,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false || python build-system/push_changes.py
+          bundle exec fastlane bump_version branch:${{ github.head_ref }} ${{env.parts}} bump_build:false || python3 build-system/push_changes.py
         working-directory: .
