@@ -1,30 +1,30 @@
-import os
 import subprocess
+import sys
 
-def push_changes():
+def push_changes(github_token, github_repository, branch):
     try:
-        subprocess.run(['git', 'push', 'origin', 'HEAD', '--tags'], check=True)
+        # Constructing the GitHub URL for authentication
+        github_url = f"https://{github_token}:x-oauth-basic@github.com/{github_repository}"
+        subprocess.run(['git', 'push', github_url, f'HEAD:{branch}'], check=True)
     except subprocess.CalledProcessError:
         print("Push failed, attempting to push using Python...")
-        push_with_python()
+        push_with_python(github_token, github_repository, branch)
 
-def push_with_python():
-    # Implement the push logic using Python here
-    # For example, you can use GitPython library to perform the push
-    # Here's a basic example using GitPython:
+def push_with_python(github_token, github_repository, branch):
     from git import Repo
 
-    # Retrieve GitHub token and repository from environment variables
-    github_token = os.environ.get('GITHUB_TOKEN')
-    github_repository = os.environ.get('GITHUB_REPOSITORY')
-    
     try:
         repo = Repo('.')
         origin = repo.remote('origin')
-        origin.push(refspec=f'HEAD:{github_repository.split("/")[1]}', tags=True)
+        origin.push(refspec=f'HEAD:{branch}', tags=True)
         print("Push successful!")
     except Exception as e:
         print("Error occurred while pushing using Python:", e)
 
 if __name__ == "__main__":
-    push_changes()
+    # Retrieve GitHub token, repository, and branch from command-line arguments
+    github_token = sys.argv[1]
+    github_repository = sys.argv[2]
+    branch = sys.argv[3]
+    
+    push_changes(github_token, github_repository, branch)
