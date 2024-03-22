@@ -4,5 +4,47 @@
     
     
     
+      
+      <testcase classname="fastlane.lanes" name="0: flutter_bump_version" time="0.001629">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: git config --global user.email kiyochinh@gmail.com" time="0.021856">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: git config --global user.name Kiyo Chinh" time="0.02631">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: git config --global push.followTags true" time="0.023255">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="4: git add ../pubspec.yaml" time="0.047369">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="5: git commit -m &apos;[Chore] Bump version from 2.2.0+32 to 2.3.0+32&apos;" time="0.07785">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="6: git tag -a v2.3.0.32 -m &apos;Version 2.3.0.32&apos;" time="0.037136">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="7: git pull --rebase origin enhance/98241" time="0.024598">
+        
+          <failure message="/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in `execute_action&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/fast_file.rb:222:in `sh&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/fast_file.rb:216:in `sh&apos;&#10;Fastfile:16:in `block in parsing_binding&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/lane.rb:41:in `call&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/runner.rb:49:in `block in execute&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/runner.rb:45:in `chdir&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/runner.rb:45:in `execute&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/lane_manager.rb:46:in `cruise_lane&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/command_line_handler.rb:34:in `handle&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/commands_generator.rb:110:in `block (2 levels) in run&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:187:in `call&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/command.rb:157:in `run&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in `run_active_command&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in `run!&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in `run!&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/commands_generator.rb:354:in `run&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/commands_generator.rb:43:in `start&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in `take_off&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/fastlane-2.219.0/bin/fastlane:23:in `&lt;top (required)&gt;&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/bin/fastlane:25:in `load&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/bin/fastlane:25:in `&lt;top (required)&gt;&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli/exec.rb:58:in `load&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli/exec.rb:58:in `kernel_load&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli/exec.rb:23:in `run&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli.rb:451:in `exec&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/vendor/thor/lib/thor/command.rb:28:in `run&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/vendor/thor/lib/thor/invocation.rb:127:in `invoke_command&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/vendor/thor/lib/thor.rb:527:in `dispatch&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli.rb:34:in `dispatch&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/vendor/thor/lib/thor/base.rb:584:in `start&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/cli.rb:28:in `start&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/bundler-2.5.3/exe/bundle:28:in `block in &lt;top (required)&gt;&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/site_ruby/3.2.0/bundler/friendly_errors.rb:117:in `with_friendly_errors&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/lib/ruby/gems/3.2.0/gems/bundler-2.5.3/exe/bundle:20:in `&lt;top (required)&gt;&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/bin/bundle:25:in `load&apos;&#10;/Users/kiyochinh/.rbenv/versions/3.2.2/bin/bundle:25:in `&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;git pull --rebase origin enhance/98241&apos; was 128 instead of 0.&#10;error: cannot pull with rebase: You have unstaged changes.&#10;error: please commit or stash them.&#10;" />
+        
+      </testcase>
+    
   </testsuite>
 </testsuites>
