@@ -58,7 +58,9 @@ jobs:
         run: |
           flutter pub get
           bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Run pod install
         run: |
           cd ios
@@ -158,7 +160,9 @@ jobs:
           bundler-cache: true
       - name: Bump version for build
         run: bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
-        # Executed at the root level, where the Fastfile for bump_version is located
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Setup Fastlane (Android Directory)
         uses: ruby/setup-ruby@v1
         with:
@@ -212,6 +216,9 @@ jobs:
           bundler-cache: true
       - name: Bump version via fastlane
         run: bundle exec fastlane bump_version push:true branch:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
   distribute_to_firebase:
     name: Distribute to Firebase
@@ -264,6 +271,9 @@ jobs:
           bundler-cache: true
       - name: Get Flutter dependencies
         run: bundle exec fastlane bump_version push:false branch:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Get Project Version
         run: "dart build-system/project_version.dart"
