@@ -9,6 +9,7 @@ g = Github(os.getenv('GITHUB_TOKEN'))
 repo_name = os.getenv('GITHUB_REPOSITORY')  # Example: "your_username/your_repository"
 repo = g.get_repo(repo_name)
 
+# Categories for changelog entries
 categories = [
     {"title": "Changes 🛠", "labels": ["major"]},
     {"title": "New Features 🎉", "labels": ["feature", "minor"]},
@@ -18,53 +19,80 @@ categories = [
     {"title": "Other Changes", "labels": ["*"]},
 ]
 
-target_version = os.getenv('TARGET_VERSION')
-version_pattern = re.compile(r"\[Chore\] Bump version from [\d\.]+\+\d+ to " + re.escape(target_version))
-version_bump_commit = None
+# Get the most recent closed PRs
+prs = repo.get_pulls(state='closed', sort='updated', direction='desc')
 
-commits = repo.get_commits(sha="staging")
-for commit in commits:
-    if version_pattern.search(commit.commit.message):
-        version_bump_commit = commit
-        # print(f"Found version bump commit: {commit.sha} - {commit.commit.message}")
-        break
+# Check for the most recent pull request with a 'changelog' label
+changelog_label = 'changelog'
+changelog_pr = prs[0] if prs.totalCount > 0 else None
+if changelog_pr and any(label.name == changelog_label for label in changelog_pr.labels):
+    # Extract and format the changelog from the PR body
+    changelog = changelog_pr.body.replace('\r', '').replace('\n', '\\n')
+else:
+    target_version = os.getenv('TARGET_VERSION')
+    version_bump_commit, previous_version_bump_commit = None, None
 
-if not version_bump_commit:
-    # print(f"Version bump to {target_version} not found.")
-    exit(1)
+    # Find version bump commits in 'staging'
+    commits = repo.get_commits(sha="staging")
+    for commit in commits:
+        if not version_bump_commit:
+            match = re.search(r"\[Chore\] Bump version from ([\d\.]+\+\d+) to " + re.escape(target_version), commit.commit.message)
+            if match:
+                version_bump_commit = commit
+                previous_version = match.group(1)  # This captures the version from which we bumped to the target version
+                continue
+        if version_bump_commit and '[Chore] Bump version from' in commit.commit.message:
+            previous_version_bump_commit = commit
+            break
 
-prs = repo.get_pulls(base="staging", state="closed", sort="created", direction="desc")
-# Initialize a dictionary to hold categorized PRs
-categorized_prs = {category["title"]: [] for category in categories}
+    if not version_bump_commit or not previous_version_bump_commit:
+        print(f"Version bump commits not found for {target_version}.")
+        exit(1)
 
-# Process each PR to categorize it based on labels
-for pr in prs:
-    if pr.merged:
+    # Check if the latest PR merged into 'staging' was from 'develop'
+    latest_pr = prs[0] if prs.totalCount > 0 else None
+    from_develop = latest_pr and latest_pr.head.ref == 'develop' and latest_pr.merged
+
+    # Initialize a dictionary to hold categorized PRs
+    categorized_prs = {category["title"]: [] for category in categories}
+
+    # Include PRs merged into 'develop' if the latest 'staging' merge was from 'develop'
+    develop_prs = []
+    if from_develop:
+        develop_prs = [pr for pr in repo.get_pulls(state='closed', base='develop', sort='updated') if pr.merged_at <= latest_pr.merged_at]
+
+    # Combine PRs from 'develop' and direct merges into 'staging' within the version range
+    countPRs = 0
+    combined_prs = list(develop_prs)
+    for pr in prs:
+        if pr.merged:
+            pr_merge_commit = repo.get_commit(pr.merge_commit_sha)
+            combined_prs.append(pr)
+        countPRs += 1
+        # Check if countPRs has reached 50
+        if countPRs == 20:
+            break
+
+    # Categorize PRs
+    for pr in combined_prs:
         pr_labels = [label.name for label in pr.labels]
-        # Fetch the PR's last commit date
-        pr_last_commit_date = pr.get_commits().reversed[0].commit.committer.date
-        # Ensure PR is after the version bump commit
-        if pr_last_commit_date > version_bump_commit.commit.committer.date:
-            # Categorize the PR based on its labels
-            categorized = False
-            for category in categories:
-                if category["title"] == "Other Changes" or any(label in pr_labels for label in category["labels"]):
-                    categorized_prs[category["title"]].append(pr)
-                    categorized = True
-                    break
-            if not categorized:
-                categorized_prs["Other Changes"].append(pr)
+        for category in categories:
+            if any(label in pr_labels for label in category["labels"]):
+                categorized_prs[category["title"]].append(pr)
+                break
+        # else:
+            # categorized_prs["Other Changes"].append(pr)
 
-changelog = f"## Changelog since version {target_version}\\n"
-is_changelog_empty = True
-for category, prs in categorized_prs.items():
-    if prs:  # Only include categories with PRs
-        is_changelog_empty = False
-        changelog += f"\\n### {category}\\n"
-        for pr in prs:
-            changelog += f"- {pr.title} #{pr.number}\\n"
+    # Generate the changelog text by category
+    changelog = f""
+    for category, prs in categorized_prs.items():
+        if prs:  # Only include categories with PRs
+            changelog += f"\n### {category}\n"
+            for pr in prs:
+                changelog += f"- {pr.title} #{pr.number}\n"
 
-if is_changelog_empty:
-    changelog += "\\n- Em chịu, không biết có update gì hong, đợi dev vào report nha mn :hehe-dog:"
+    if not any(categorized_prs.values()):
+        changelog += "\n- Waiting for updates from the dev 🫣"
 
-print(changelog)
+    # Output the changelog
+    print(changelog.replace('\n', '\\n'))
