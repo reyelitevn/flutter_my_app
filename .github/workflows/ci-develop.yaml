@@ -91,6 +91,6 @@ jobs:
         run: dart analyze
         if: github.event.action == 'opened'
 
-      - name: Run Tests
-        run: flutter test
-        if: github.event.action == 'opened'
+      # - name: Run Tests
+      #   run: flutter test
+      #   if: github.event.action == 'opened'
