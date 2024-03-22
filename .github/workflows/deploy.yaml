@@ -88,6 +88,9 @@ jobs:
         working-directory: android
 
       - run: bundle exec fastlane bump_version bump:${{ github.event.inputs.bump_version }} push:${{ github.event.inputs.create_tag_and_push }} branch:${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         working-directory: android
       - run: bundle exec fastlane android deploy track:${{ github.event.inputs.track }}
         working-directory: android
